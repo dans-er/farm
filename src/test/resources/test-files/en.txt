@@ -1,0 +1,13 @@
+Figure 1.2
+Seven top-level MIME types 
+hierarchy as defined by IANA’s RFC 
+2046 (the eighth type model was added 
+later in RFC 2077). Top-level types can 
+have subtypes (children), and so on, as 
+new media types are defined over the 
+years. The use of the multiplicity 
+denotes that multiple children may be 
+present at the same level in the 
+hierarchy, and the ellipses indicate that 
+the remainder of the hierarchy has been 
+elided in favor of brevity
