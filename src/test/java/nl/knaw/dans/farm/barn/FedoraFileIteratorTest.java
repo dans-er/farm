@@ -83,6 +83,8 @@ public class FedoraFileIteratorTest extends AbstractFedoraTest
     
     @Test
     public void testNext() {
+        int maxCount = 30;
+        int count = 0;
         FedoraFileIterator iter = new FedoraFileIterator();
         iter.setIdentifierFilter(new IdentifierFilter()
         {
@@ -98,10 +100,11 @@ public class FedoraFileIteratorTest extends AbstractFedoraTest
                 }
             }
         });
-        while (iter.hasNext()) {
+        while (iter.hasNext() && count < maxCount) {
             FileInformationPackage fip = iter.next();
             System.err.println(fip.getIdentifier());
             fip.close();
+            count += 1;
         }
         
     }

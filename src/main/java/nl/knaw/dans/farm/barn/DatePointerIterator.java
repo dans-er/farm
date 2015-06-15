@@ -1,12 +1,12 @@
 package nl.knaw.dans.farm.barn;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.util.List;
 
-import nl.knaw.dans.farm.FarmException;
 import nl.knaw.dans.farm.FileInformationPackage;
 
+import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -24,7 +24,7 @@ public class DatePointerIterator extends FedoraFileIterator
     private String fileLocation;
     private String startDate;
     private DateTime datePointer;
-    private RandomAccessFile raf;
+    
     private DateTimeFormatter format;
     private int counter;
     
@@ -47,29 +47,13 @@ public class DatePointerIterator extends FedoraFileIterator
         } else {
             String currentIdentifier = null;
             while (!super.hasNext() && getDatePointer().isBeforeNow()) {
-                writeDate(datePointer);
+                writeDate(datePointer, counter);
                 datePointer = datePointer.plusDays(1);
+                counter = 0;
                 currentIdentifier = findNextIdentifier();
                 logger.debug("Looking for {} and starting with {}", getFormat().print(datePointer), currentIdentifier);
             }
-            if (currentIdentifier == null) {
-                close();
-            }
             return currentIdentifier != null;
-        }
-    }
-    
-    private void close()
-    {
-        if (raf != null) {
-            try
-            {
-                raf.close();
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException(e);
-            }
         }
     }
 
@@ -87,75 +71,59 @@ public class DatePointerIterator extends FedoraFileIterator
     }
     
     protected DateTime getDatePointer() {
-        if (datePointer == null) {
-            String start = getStartDate();
-            logger.debug("starting with '{}'", start);
-            datePointer = new DateTime(start);
+        if (datePointer == null) {            
+            datePointer = getStartDate();
+            logger.debug("starting with '{}'", getFormat().print(datePointer));
         }
         return datePointer;
     }
 
-    public String getStartDate()
+    public DateTime getStartDate()
     {
-        if (startDate == null) {
+        if (startDate != null) {
+            return new DateTime(startDate);
+        } else {
+            String lastDate = readStartDate();
+            if (lastDate != null) {
+                return new DateTime(lastDate).plusDays(1);
+            } else {
+                return new DateTime(START_DATE);
+            }
+        }
+    }
+
+    protected String readStartDate()
+    {
+        logger.debug("Reading startDate from {}.", getFileLocation());
+        File file = new File(getFileLocation());
+        String lastDate = null;
+        if (file.exists()) {
             try
             {
-                startDate = readStartDate();
+                List<String> lines = FileUtils.readLines(file, "UTF-8");
+                if (lines.size() > 0) {
+                    lastDate = lines.get(lines.size() - 1).split(";")[0];
+                }
             }
-            catch (FarmException e)
+            catch (IOException e)
             {
                 throw new RuntimeException(e);
             }
-            if (startDate == null) {
-                startDate = START_DATE;
-            }
-        }
-        return startDate;
-    }
-
-    protected String readStartDate() throws FarmException
-    {
-        logger.debug("Reading startDate from {}.", getFileLocation());
-        RandomAccessFile ra = getRaf();
-        String lastDate = null;
-        String line = null;
-        try
-        {
-            while ((line = ra.readLine()) != null) {
-                lastDate = line.split(";")[0];
-            }
-        }
-        catch (IOException e)
-        {
-            throw new FarmException(e);
         }
         return lastDate;
     }
     
-    protected void writeDate(DateTime date) {
+    protected void writeDate(DateTime date, int count) {
+        File file = new File(getFileLocation());
+        String line = getFormat().print(date) + ";" + count + "\n";
         try
         {
-            getRaf().writeUTF(getFormat().print(date) + ";" + counter + "\n");
-            counter = 0;
+            FileUtils.write(file, line, "UTF-8", true);
         }
         catch (IOException e)
         {
             throw new RuntimeException(e);
         }
-    }
-    
-    private RandomAccessFile getRaf() {
-        if (raf == null) {
-            try
-            {
-                raf = new RandomAccessFile(getFileLocation(), "rw");
-            }
-            catch (FileNotFoundException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-        return raf;
     }
 
     public void setStartDate(String startDate)

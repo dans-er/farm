@@ -34,6 +34,7 @@ public class FedoraFileIterator implements FileIterator
 {
     
     public static final int MAX_RESULTS = 25;
+    public static final int MAX_TRY_COUNT = 3;
     
     private static Logger logger = LoggerFactory.getLogger(FedoraFileIterator.class);
     
@@ -42,6 +43,7 @@ public class FedoraFileIterator implements FileIterator
     private String token = "start";
     private IdentifierFilter identifierFilter;
     private String nextIdentifier = "start";
+    private int maxTryCount;
     
     public FedoraFileIterator() {
         
@@ -81,39 +83,43 @@ public class FedoraFileIterator implements FileIterator
     @Override
     public FileInformationPackage next()
     {
-        if ("start".equals(nextIdentifier)) {
-            findNextIdentifier();
+        FileInformationPackage fip = doNext();
+        return fip;
+    }
+    
+    protected FileInformationPackage doNext() {
+        FileInformationPackage fip = null;
+        int tryCount = 0;
+        while (fip == null && tryCount < getMaxTryCount()) {
+            if ("start".equals(nextIdentifier)) {
+                findNextIdentifier();
+            }
+            if (nextIdentifier == null){
+                throw new NoSuchElementException();
+            }
+            try
+            {
+                fip = getFileInformationPackage(nextIdentifier);
+            }
+            catch (FarmException e)
+            {
+                logger.error("\n======> Giving up for {}. \n", nextIdentifier);
+                // collect identifier of missed file-item.
+                
+                
+            } finally {
+                tryCount += 1;
+                findNextIdentifier();
+            }
         }
-        if (nextIdentifier == null){
-            throw new NoSuchElementException();
+        if (fip == null) {
+            throw new RuntimeException("Could not get a File Information Package due to previous errors.");
         }
-        try
-        {
-            FileInformationPackage fip = getFileInformationPackage(nextIdentifier);
-            findNextIdentifier();
-            return fip;
-        }
-        catch (FedoraClientException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (JDOMException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (FarmException e)
-        {
-            throw new RuntimeException(e);
-        }
+        return fip;
     }
 
     protected String findNextIdentifier()
-    {
-        
+    {       
         boolean found = false;
         try
         {
@@ -139,6 +145,21 @@ public class FedoraFileIterator implements FileIterator
         throw new UnsupportedOperationException();
     }
     
+    public int getMaxTryCount()
+    {
+        if (maxTryCount == 0) {
+            maxTryCount = MAX_TRY_COUNT;
+        }
+        return maxTryCount;
+    }
+
+
+    public void setMaxTryCount(int maxTryCount)
+    {
+        this.maxTryCount = maxTryCount;
+    }
+
+
     protected boolean hasNextPid() throws FedoraClientException {
         if (pids == null) {
             startFindFiles();
@@ -171,7 +192,6 @@ public class FedoraFileIterator implements FileIterator
         logger.debug("Start find files found {} identifiers.", pids.size());
     }
 
-
     protected String getQuery()
     {
         return "pid%7Eeasy-file:*";
@@ -189,15 +209,48 @@ public class FedoraFileIterator implements FileIterator
         logger.debug("Continue find files found {} identifiers.", pids.size());
     }
     
-    protected FileInformationPackage getFileInformationPackage(String identifier) throws FedoraClientException, JDOMException, IOException, FarmException {
-        FileInformationPackage fip = new FileInformationPackage(identifier);
-        fip.setFileMetadata(getFileMetadata(identifier));
-        fip.setFileProfile(getFileProfile(identifier));
-        
-        FedoraResponse response = new GetDatastreamDissemination(identifier, FileInformationPackage.DS_ID_EASY_FILE).execute();
-        fip.setInutStream(response.getEntityInputStream());
-        
-        logger.debug("Retrieved file information package for {}", identifier);
+    protected FileInformationPackage getFileInformationPackage(String identifier) throws FarmException {
+        FileInformationPackage fip = null;
+        boolean complete = false;
+        int tryCount = 0;
+        while (!complete && tryCount < getMaxTryCount())
+        {
+            fip = new FileInformationPackage(identifier);
+            try
+            {
+                fip.setFileMetadata(getFileMetadata(identifier));
+                fip.setFileProfile(getFileProfile(identifier));
+
+                FedoraResponse response = new GetDatastreamDissemination(identifier, FileInformationPackage.DS_ID_EASY_FILE).execute();
+                fip.setInutStream(response.getEntityInputStream());
+
+                complete = true;
+                logger.debug("Retrieved File Information Package for {}", identifier);
+            }
+            catch (FedoraClientException e)
+            {
+                tryCount += 1;
+                logger.error("Exception while getting File Information Package for " + identifier, e);
+            }
+            catch (JDOMException e)
+            {
+                tryCount += 1;
+                logger.error("Exception while getting File Information Package for " + identifier, e);
+            }
+            catch (IOException e)
+            {
+                tryCount += 1;
+                logger.error("Exception while getting File Information Package for " + identifier, e);
+            }
+            catch (Exception e)
+            {
+                tryCount += 1;
+                logger.error("Exception while getting File Information Package for " + identifier, e);
+            }
+        }
+        if (!complete) {
+            throw new FarmException("Could not collect complete File Information Package. See previous errors for details.");
+        }
         return fip;
     }
     

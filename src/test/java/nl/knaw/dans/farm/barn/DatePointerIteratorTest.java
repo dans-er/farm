@@ -1,5 +1,7 @@
 package nl.knaw.dans.farm.barn;
 
+import nl.knaw.dans.farm.FileInformationPackage;
+
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -34,11 +36,23 @@ public class DatePointerIteratorTest extends AbstractFedoraTest
     
     @Test
     public void datePointerIteratorTest() throws Exception {
+        int maxCount = 1000000;
+        int count = 0;
         DatePointerIterator dpi = new DatePointerIterator();
-        dpi.setStartDate("2014-10-20");
-        while (dpi.hasNext()) {
-            System.err.println(dpi.next().getFileProfile().getLastModified());
+        dpi.setStartDate("2015-04-17");
+        while (dpi.hasNext() && count < maxCount) {
+            FileInformationPackage fip = dpi.next();
+            System.err.println(fip.getFileProfile().getLastModified());
+            count += 1;
+            fip.close();
         }
+    }
+    
+    @Test
+    public void testSpecificFile() throws Exception {
+        DatePointerIterator dpi = new DatePointerIterator();
+        FileInformationPackage fip = dpi.getFileInformationPackage("easy-file:285107");
+        
     }
     
 }
