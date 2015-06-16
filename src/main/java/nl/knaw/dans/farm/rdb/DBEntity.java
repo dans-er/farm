@@ -1,0 +1,79 @@
+package nl.knaw.dans.farm.rdb;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+
+import org.joda.time.DateTime;
+
+@MappedSuperclass
+public abstract class DBEntity implements Entity
+{
+
+    private static final long serialVersionUID = -4182350384996292535L;
+
+    @Id
+    @GeneratedValue
+    @Column(name = "profile_id")
+    private Long id;
+
+    @Column(name = "recordcreationdate", nullable = false)
+    private Date recordCreationDate;
+
+    /**
+     * Creates a new Entity with its creationDate set to the current system time.
+     */
+    public DBEntity()
+    {
+        recordCreationDate = new Date();
+    }
+
+    @Override
+    public Long getId()
+    {
+        return id;
+    }
+
+    public boolean isPersisted()
+    {
+        return getId() != null;
+    }
+
+    public boolean isTransient()
+    {
+        return getId() == null;
+    }
+
+    public DateTime getRecordCreationDate()
+    {
+        return convert(recordCreationDate);
+    }
+
+    public static DateTime convert(Date date)
+    {
+        if (date == null)
+        {
+            return null;
+        }
+        else
+        {
+            return new DateTime(date.getTime());
+        }
+    }
+
+    public static Date convert(DateTime dt)
+    {
+        if (dt == null)
+        {
+            return null;
+        }
+        else
+        {
+            return dt.toDate();
+        }
+    }
+
+}

@@ -14,6 +14,7 @@ import nl.knaw.dans.farm.FileIterator;
 import nl.knaw.dans.farm.FileMetadata;
 import nl.knaw.dans.farm.FileProfile;
 import nl.knaw.dans.farm.IdentifierFilter;
+import nl.knaw.dans.farm.ResourceProfile;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -26,9 +27,11 @@ import com.yourmediashelf.fedora.client.FedoraClientException;
 import com.yourmediashelf.fedora.client.request.FindObjects;
 import com.yourmediashelf.fedora.client.request.GetDatastream;
 import com.yourmediashelf.fedora.client.request.GetDatastreamDissemination;
+import com.yourmediashelf.fedora.client.request.GetObjectProfile;
 import com.yourmediashelf.fedora.client.response.FedoraResponse;
 import com.yourmediashelf.fedora.client.response.FindObjectsResponse;
 import com.yourmediashelf.fedora.client.response.GetDatastreamResponse;
+import com.yourmediashelf.fedora.client.response.GetObjectProfileResponse;
 
 public class FedoraFileIterator implements FileIterator
 {
@@ -44,6 +47,7 @@ public class FedoraFileIterator implements FileIterator
     private IdentifierFilter identifierFilter;
     private String nextIdentifier = "start";
     private int maxTryCount;
+    private Reporter reporter;
     
     public FedoraFileIterator() {
         
@@ -70,6 +74,21 @@ public class FedoraFileIterator implements FileIterator
     {
         this.identifierFilter = identifierFilter;
     }
+
+    public Reporter getReporter()
+    {
+        if (reporter == null) {
+            reporter = new Reporter();
+        }
+        return reporter;
+    }
+
+
+    public void setReporter(Reporter reporter)
+    {
+        this.reporter = reporter;
+    }
+
 
     @Override
     public boolean hasNext()
@@ -103,9 +122,9 @@ public class FedoraFileIterator implements FileIterator
             }
             catch (FarmException e)
             {
-                logger.error("\n======> Giving up for {}. \n", nextIdentifier);
+                logger.error("\n\nMISSING ======> Giving up for {} \n", nextIdentifier);
                 // collect identifier of missed file-item.
-                
+                getReporter().reportMissing(nextIdentifier, e.getMessage());
                 
             } finally {
                 tryCount += 1;
@@ -219,6 +238,7 @@ public class FedoraFileIterator implements FileIterator
             try
             {
                 fip.setFileMetadata(getFileMetadata(identifier));
+                fip.setResourceProfile(getResourceProfile(identifier));
                 fip.setFileProfile(getFileProfile(identifier));
 
                 FedoraResponse response = new GetDatastreamDissemination(identifier, FileInformationPackage.DS_ID_EASY_FILE).execute();
@@ -254,6 +274,14 @@ public class FedoraFileIterator implements FileIterator
         return fip;
     }
     
+    protected ResourceProfile getResourceProfile(String identifier) throws FedoraClientException
+    {
+        GetObjectProfileResponse response = new GetObjectProfile(identifier).execute();
+        ResourceProfile rp = new ResourceProfile(response.getObjectProfile());
+        return rp;
+    }
+
+
     protected FileProfile getFileProfile(String identifier) throws FedoraClientException, FarmException {
         GetDatastreamResponse response = new GetDatastream(identifier, FileInformationPackage.DS_ID_EASY_FILE).execute();
         FileProfile fp = new FileProfile(response.getDatastreamProfile());

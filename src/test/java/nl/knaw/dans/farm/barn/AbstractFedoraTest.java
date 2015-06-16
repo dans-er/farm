@@ -23,6 +23,7 @@ public class AbstractFedoraTest
     
     private static final String props_location = "non-pub/remote_testing.properties";
     private static Properties props;
+    
         
     
     public static boolean remoteTestingEnabled() {

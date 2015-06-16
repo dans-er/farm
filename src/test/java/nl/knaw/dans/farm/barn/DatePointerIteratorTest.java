@@ -2,12 +2,10 @@ package nl.knaw.dans.farm.barn;
 
 import nl.knaw.dans.farm.FileInformationPackage;
 
-import org.joda.time.DateTime;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import com.yourmediashelf.fedora.client.request.FindObjects;
-import com.yourmediashelf.fedora.client.response.FindObjectsResponse;
-
+@Ignore
 public class DatePointerIteratorTest extends AbstractFedoraTest
 {
     
@@ -39,7 +37,7 @@ public class DatePointerIteratorTest extends AbstractFedoraTest
         int maxCount = 1000000;
         int count = 0;
         DatePointerIterator dpi = new DatePointerIterator();
-        dpi.setStartDate("2015-04-17");
+        //dpi.setStartDate("2015-04-17");
         while (dpi.hasNext() && count < maxCount) {
             FileInformationPackage fip = dpi.next();
             System.err.println(fip.getFileProfile().getLastModified());

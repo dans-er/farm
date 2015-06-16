@@ -21,6 +21,7 @@ public class FileInformationPackage
     private final String identifier;
     
     private FileMetadata fileMetadata;
+    private ResourceProfile resourceProfile;
     private FileProfile fileProfile;
     private InputStream ins;
     private UnclosableBufferedInputStream bins;
@@ -43,6 +44,16 @@ public class FileInformationPackage
     public void setFileMetadata(FileMetadata fileMetadata)
     {
         this.fileMetadata = fileMetadata;
+    }
+
+    public ResourceProfile getResourceProfile()
+    {
+        return resourceProfile;
+    }
+
+    public void setResourceProfile(ResourceProfile resourceProfile)
+    {
+        this.resourceProfile = resourceProfile;
     }
 
     public FileProfile getFileProfile() {

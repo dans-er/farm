@@ -13,8 +13,10 @@ import nl.knaw.dans.farm.FileProfile;
 import nl.knaw.dans.farm.IdentifierFilter;
 
 import org.joda.time.DateTime;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class FedoraFileIteratorTest extends AbstractFedoraTest
 {
     
