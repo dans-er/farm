@@ -32,6 +32,10 @@ public class Conveyor
     {
         this.analyzers = analyzers;
     }
+    
+    public void addAnalyzer(int index, Analyzer analyzer) {
+        analyzers.add(index, analyzer);
+    }
 
     public FileIterator getFileIterator()
     {

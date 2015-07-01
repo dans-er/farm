@@ -105,9 +105,9 @@ public abstract class AbstractGenericStore<T extends Entity, ID extends Serializ
          return getEntityManager().merge(entity);
      }
 
-     public void merge(T entity)
+     public T merge(T entity)
      {
-         getEntityManager().merge(entity);
+         return getEntityManager().merge(entity);
      }
 
      public T saveOrUpdate(T entity)
@@ -118,16 +118,16 @@ public abstract class AbstractGenericStore<T extends Entity, ID extends Serializ
          }
          else
          {
-             return entity;
+             return persist(entity);
          }
      }
 
      // 2011 03 19
-//    public T persist(T entity)
-//    {
-//        getEntityManager().persist(entity);
-//        return entity;
-//    }
+        public T persist(T entity)
+        {
+            getEntityManager().persist(entity);
+            return entity;
+        }
 
      public void makeTransient(T entity)
      {

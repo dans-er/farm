@@ -23,7 +23,7 @@ public interface GenericStore<T extends Entity, ID extends Serializable>
 
      void makeTransient(T entity);
 
-     void merge(T entity);
+     T merge(T entity);
 
      T saveOrUpdate(T entity);
 

@@ -3,9 +3,8 @@ package nl.knaw.dans.farm.rdb;
 import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Version;
 
 import org.joda.time.DateTime;
 
@@ -15,13 +14,12 @@ public abstract class DBEntity implements Entity
 
     private static final long serialVersionUID = -4182350384996292535L;
 
-    @Id
-    @GeneratedValue
-    @Column(name = "profile_id")
-    private Long id;
 
     @Column(name = "recordcreationdate", nullable = false)
     private Date recordCreationDate;
+    
+    @Version
+    private Date recordlastmodified;
 
     /**
      * Creates a new Entity with its creationDate set to the current system time.
@@ -29,12 +27,6 @@ public abstract class DBEntity implements Entity
     public DBEntity()
     {
         recordCreationDate = new Date();
-    }
-
-    @Override
-    public Long getId()
-    {
-        return id;
     }
 
     public boolean isPersisted()
@@ -50,6 +42,11 @@ public abstract class DBEntity implements Entity
     public DateTime getRecordCreationDate()
     {
         return convert(recordCreationDate);
+    }
+    
+    public DateTime getRecordLastModified()
+    {
+        return convert(recordlastmodified);
     }
 
     public static DateTime convert(Date date)

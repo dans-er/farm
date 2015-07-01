@@ -1,13 +1,21 @@
-package nl.knaw.dans.farm.rdb;
+package nl.knaw.dans.farm.fed;
 
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NaturalId;
+
 import nl.knaw.dans.farm.FileInformationPackage;
+import nl.knaw.dans.farm.FileMetadata;
+import nl.knaw.dans.farm.FileProfile;
+import nl.knaw.dans.farm.ResourceProfile;
+import nl.knaw.dans.farm.rdb.DBEntity;
 
 @Entity
 @Table(name = "profile", indexes = {@Index(columnList="fedora_identifier")})
@@ -16,6 +24,12 @@ public class Profile extends DBEntity
     
     private static final long serialVersionUID = 7710778080642553612L;
     
+    @Id
+    @GeneratedValue
+    @Column(name = "profile_id")
+    private Long id;
+    
+    @NaturalId
     @Column(name = "fedora_identifier", nullable = false, unique = true)
     private String identifier;
     
@@ -55,34 +69,77 @@ public class Profile extends DBEntity
     @Column(name = "ds_size")
     private long dsSize;
     
+    @Column(name = "fmd_identifier")
+    private String fmdIdentifier;
+    @Column(name = "fmd_parent_id")
+    private String fmdParentId;
+    @Column(name = "fmd_dataset_id")
+    private String fmdDatasetId;
+    @Column(name = "fmd_filename", length = 512)
+    private String fmdFileName;
+    @Column(name = "fmd_path", length = 1024)
+    private String fmdPath;
+    @Column(name = "fmd_mediatype")
+    private String fmdMediatype;
+    @Column(name = "fmd_size")
+    private long fmdSize;
+    @Column(name = "fmd_creator_role")
+    private String fmdCreatorRole;
+    @Column(name = "fmd_visible_to")
+    private String fmdVisibleTo;
+    @Column(name = "fmd_accessible_to")
+    private String fmdAccessibleTo;
+    
     protected Profile() {
         
     }
     
     public Profile(FileInformationPackage fip) {
+        update(fip);
+    }
+
+    public void update(FileInformationPackage fip)
+    {
         setIdentifier(fip.getIdentifier());
-        identifier = fip.getIdentifier();
         
-        setObjLabel(fip.getResourceProfile().getLabel());
-        setObjCreationDate(convert(fip.getResourceProfile().getCreationDate()));
-        setOblLastModified(convert(fip.getResourceProfile().getLastModifiecd()));
-        setObjOwnerId(fip.getResourceProfile().getOwnerId());
-        setObjState(fip.getResourceProfile().getState());
+        ResourceProfile rp = fip.getResourceProfile();
+        setObjLabel(rp.getLabel());
+        setObjCreationDate(convert(rp.getCreationDate()));
+        setOblLastModified(convert(rp.getLastModifiecd()));
+        setObjOwnerId(rp.getOwnerId());
+        setObjState(rp.getState());
         
-        setDsVersionId(fip.getFileProfile().getVersionId());
-        setDsCreationDate(convert(fip.getFileProfile().getCreationDate()));
-        setDsLastModified(convert(fip.getFileProfile().getLastModified()));
-        setDsLabel(fip.getFileProfile().getLabel());
-        setDsVersionable(fip.getFileProfile().isVersionable());
-        setDsState(fip.getFileProfile().getState());
-        setDsControlGroup(fip.getFileProfile().getControlGroup());
-        setDsChecksumType(fip.getFileProfile().getChecksumType());
-        setDsChecksum(fip.getFileProfile().getChecksum());
-        setDsFormatUri(fip.getFileProfile().getFormatURI());
-        setDsMediaType(fip.getFileProfile().getMediaType());
-        setDsSize(fip.getFileProfile().getSize());
+        FileProfile fp = fip.getFileProfile();
+        setDsVersionId(fp.getVersionId());
+        setDsCreationDate(convert(fp.getCreationDate()));
+        setDsLastModified(convert(fp.getLastModified()));
+        setDsLabel(fp.getLabel());
+        setDsVersionable(fp.isVersionable());
+        setDsState(fp.getState());
+        setDsControlGroup(fp.getControlGroup());
+        setDsChecksumType(fp.getChecksumType());
+        setDsChecksum(fp.getChecksum());
+        setDsFormatUri(fp.getFormatURI());
+        setDsMediaType(fp.getMediaType());
+        setDsSize(fp.getSize());
         
-        fip.getFileProfile().getSize();
+        FileMetadata fmd = fip.getFileMetadata();
+        setFmdIdentifier(fmd.getIdentifier());
+        setFmdParentId(fmd.getParentId());
+        setFmdDatasetId(fmd.getDatasetId());
+        setFmdFileName(fmd.getFilename());
+        setFmdPath(fmd.getPath());
+        setFmdMediatype(fmd.getMediaType());
+        setFmdSize(fmd.getSize());
+        setFmdCreatorRole(fmd.getCreatorRole());
+        setFmdVisibleTo(fmd.getVisibleTo());
+        setFmdAccessibleTo(fmd.getAccessibleTo());
+    }
+    
+    @Override
+    public Long getId()
+    {
+        return id;
     }
 
     public String getIdentifier()
@@ -263,6 +320,130 @@ public class Profile extends DBEntity
     public void setDsSize(long dsSize)
     {
         this.dsSize = dsSize;
+    }
+
+    public String getFmdDatasetId()
+    {
+        return fmdDatasetId;
+    }
+
+    public void setFmdDatasetId(String fmdDatasetId)
+    {
+        this.fmdDatasetId = fmdDatasetId;
+    }
+
+    public String getFmdIdentifier()
+    {
+        return fmdIdentifier;
+    }
+
+    public void setFmdIdentifier(String fmdIdentifier)
+    {
+        this.fmdIdentifier = fmdIdentifier;
+    }
+
+    public String getFmdParentId()
+    {
+        return fmdParentId;
+    }
+
+    public void setFmdParentId(String fmdParentId)
+    {
+        this.fmdParentId = fmdParentId;
+    }
+
+    public String getFmdFileName()
+    {
+        return fmdFileName;
+    }
+
+    public void setFmdFileName(String fmdFileName)
+    {
+        this.fmdFileName = fmdFileName;
+    }
+
+    public String getFmdPath()
+    {
+        return fmdPath;
+    }
+
+    public void setFmdPath(String fmdPath)
+    {
+        this.fmdPath = fmdPath;
+    }
+
+    public String getFmdMediatype()
+    {
+        return fmdMediatype;
+    }
+
+    public void setFmdMediatype(String fmdMediatype)
+    {
+        this.fmdMediatype = fmdMediatype;
+    }
+
+    public long getFmdSize()
+    {
+        return fmdSize;
+    }
+
+    public void setFmdSize(long fmdSize)
+    {
+        this.fmdSize = fmdSize;
+    }
+
+    public String getFmdCreatorRole()
+    {
+        return fmdCreatorRole;
+    }
+
+    public void setFmdCreatorRole(String fmdCreatorRole)
+    {
+        this.fmdCreatorRole = fmdCreatorRole;
+    }
+
+    public String getFmdVisibleTo()
+    {
+        return fmdVisibleTo;
+    }
+
+    public void setFmdVisibleTo(String fmdVisibleTo)
+    {
+        this.fmdVisibleTo = fmdVisibleTo;
+    }
+
+    public String getFmdAccessibleTo()
+    {
+        return fmdAccessibleTo;
+    }
+
+    public void setFmdAccessibleTo(String fmdAccessibleTo)
+    {
+        this.fmdAccessibleTo = fmdAccessibleTo;
+    }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof Profile) {
+            Profile other = (Profile) obj;
+            if (other.identifier == null || this.identifier == null) {
+                return false;
+            } else {
+                return identifier.equals(other.identifier);
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        if (identifier == null) {
+            return 0;
+        } else {
+            return identifier.hashCode();
+        }
     }
 
 }
