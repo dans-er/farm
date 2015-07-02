@@ -1,7 +1,6 @@
 package nl.knaw.dans.farm.fits;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -20,14 +19,13 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.NaturalId;
 
-import edu.harvard.hul.ois.fits.FitsOutput;
-import edu.harvard.hul.ois.fits.identity.FitsIdentity;
-import edu.harvard.hul.ois.fits.tools.ToolInfo;
-
 @Entity
 @Table(name = "fitsprofile", indexes = {@Index(columnList="fedora_identifier")})
 public class FitsProfile extends DBEntity
 {
+    
+    public static final String ELEMENT_NAME_MEDIA_TYPE = "mediatype";
+    public static final String ELEMENT_NAME_EXTERNAL_ID = "exid";
 
     private static final long serialVersionUID = -4307015295735418345L;
     
@@ -40,12 +38,14 @@ public class FitsProfile extends DBEntity
     @Column(name = "fedora_identifier", nullable = false, unique = true)
     private String identifier;
     
-    @Column(name = "mediatype_conflict")
-    private boolean mediaTypeConflict;
-    
-    @OneToMany(mappedBy = "fitsProfile", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, orphanRemoval = true)
     @Cascade({CascadeType.ALL})
     private Set<FitsMediatype> mediatypes;
+    
+    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, orphanRemoval = true)
+    @Cascade({CascadeType.ALL})
+    private Set<FitsFileInfo> fileInformation;
+    
     
     protected FitsProfile()
     {
@@ -61,22 +61,6 @@ public class FitsProfile extends DBEntity
         setIdentifier(fip.getIdentifier());       
     }
     
-    public void update(FitsOutput fop) {
-        getMediatypes().clear();
-        List<FitsIdentity> identities = fop.getIdentities();
-        setMediaTypeConflict(identities.size() != 1);
-        if (hasMediaTypeConflict()) {
-            for (FitsIdentity identity : identities) {
-                String mediatype = identity.getMimetype();
-                for (ToolInfo tool : identity.getReportingTools()) {
-                    addMediatype(tool.getName(), tool.getVersion(), mediatype);
-                }
-            }
-        } else {
-            FitsIdentity identity = identities.get(0);
-            addMediatype(identity.getToolName(), identity.getToolVersion(), identity.getMimetype());
-        }
-    }
 
     @Override
     public Long getId()
@@ -102,25 +86,27 @@ public class FitsProfile extends DBEntity
         return mediatypes;
     }
     
-    public void addMediatype(String toolName, String toolVersion, String mediatype) {
-        addMediatype(new FitsMediatype(toolName, toolVersion, mediatype));
+    public FitsMediatype addMediatype(String elementName, String toolName, String toolVersion, String mediatype, String format) {
+        return addMediatype(new FitsMediatype(elementName, toolName, toolVersion, mediatype, format));
     }
     
-    public void addMediatype(FitsMediatype mediatype) {
-        mediatype.setIdentifier(getIdentifier());
-        mediatype.setParent(this);
+    public FitsMediatype addMediatype(FitsMediatype mediatype) {
+        mediatype.setIdentifier(getIdentifier(), this);
         getMediatypes().add(mediatype);
+        return mediatype;
     }
-
-    public boolean hasMediaTypeConflict()
-    {
-        return mediaTypeConflict;
+    
+    public Set<FitsFileInfo> getFileInformation() {
+        if (fileInformation == null) {
+            fileInformation = new HashSet<FitsFileInfo>();
+        }
+        return fileInformation;
     }
-
-    public void setMediaTypeConflict(boolean mediaTypeConflict)
-    {
-        this.mediaTypeConflict = mediaTypeConflict;
+    
+    public FitsFileInfo addFileInfo(FitsFileInfo fileInfo) {
+        fileInfo.setIdentifier(identifier, this);
+        getFileInformation().add(fileInfo);
+        return fileInfo;
     }
-
     
 }

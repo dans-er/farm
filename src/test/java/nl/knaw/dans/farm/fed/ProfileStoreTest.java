@@ -1,21 +1,25 @@
 package nl.knaw.dans.farm.fed;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Date;
 
 import javax.persistence.EntityTransaction;
 
-import nl.knaw.dans.farm.fed.Profile;
-import nl.knaw.dans.farm.fed.ProfileStore;
-import nl.knaw.dans.farm.rdb.AbstractStoreTest;
 import nl.knaw.dans.farm.rdb.JPAUtil;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 
-public class ProfileStoreTest extends AbstractStoreTest
+public class ProfileStoreTest
 {
+    @BeforeClass
+    public static void before() throws Exception {
+        JPAUtil.setTestState(true);
+    }
     
     @Test
     public void crudTest() throws Exception {

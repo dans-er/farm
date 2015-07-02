@@ -17,6 +17,8 @@ public interface Entity extends Serializable
      DateTime getRecordCreationDate();
      
      DateTime getRecordLastModified();
+     
+     void updateLastModified();
 
      boolean isPersisted();
 

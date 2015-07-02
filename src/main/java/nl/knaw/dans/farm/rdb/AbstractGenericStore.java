@@ -102,11 +102,13 @@ public abstract class AbstractGenericStore<T extends Entity, ID extends Serializ
 
      public T makePersistent(T entity)
      {
+         entity.updateLastModified();
          return getEntityManager().merge(entity);
      }
 
      public T merge(T entity)
      {
+         entity.updateLastModified();
          return getEntityManager().merge(entity);
      }
 
@@ -125,6 +127,7 @@ public abstract class AbstractGenericStore<T extends Entity, ID extends Serializ
      // 2011 03 19
         public T persist(T entity)
         {
+            entity.updateLastModified();
             getEntityManager().persist(entity);
             return entity;
         }

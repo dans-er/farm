@@ -28,6 +28,12 @@ public abstract class DBEntity implements Entity
     {
         recordCreationDate = new Date();
     }
+    
+    @Override
+    public void updateLastModified()
+    {
+        recordlastmodified = new Date();
+    }
 
     public boolean isPersisted()
     {
