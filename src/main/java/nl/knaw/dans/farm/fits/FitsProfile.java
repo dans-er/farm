@@ -46,6 +46,17 @@ public class FitsProfile extends DBEntity
     @Cascade({CascadeType.ALL})
     private Set<FitsFileInfo> fileInformation;
     
+    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, orphanRemoval = true)
+    @Cascade({CascadeType.ALL})
+    private Set<FitsFileStatus> fileStatus;
+    
+    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, orphanRemoval = true)
+    @Cascade({CascadeType.ALL})
+    private Set<FitsTechMetadata> techMetadata;
+    
+    @Column(name = "type")
+    private String type;
+    
     
     protected FitsProfile()
     {
@@ -78,6 +89,16 @@ public class FitsProfile extends DBEntity
         this.identifier = identifier;
     }
 
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
     public Set<FitsMediatype> getMediatypes()
     {
         if (mediatypes == null) {
@@ -104,9 +125,35 @@ public class FitsProfile extends DBEntity
     }
     
     public FitsFileInfo addFileInfo(FitsFileInfo fileInfo) {
-        fileInfo.setIdentifier(identifier, this);
+        fileInfo.setIdentifier(getIdentifier(), this);
         getFileInformation().add(fileInfo);
         return fileInfo;
+    }
+    
+    public Set<FitsFileStatus> getFileStatus() {
+        if (fileStatus == null) {
+            fileStatus = new HashSet<FitsFileStatus>();
+        }
+        return fileStatus;
+    }
+    
+    public FitsFileStatus addFileStat(FitsFileStatus fileStat) {
+        fileStat.setIdentifier(getIdentifier(), this);
+        getFileStatus().add(fileStat);
+        return fileStat;
+    }
+    
+    public Set<FitsTechMetadata> getTechMetadata() {
+        if (techMetadata == null) {
+            techMetadata = new HashSet<FitsTechMetadata>();
+        }
+        return techMetadata;
+    }
+    
+    public FitsTechMetadata addTechMd(FitsTechMetadata techMd) {
+        techMd.setIdentifier(getIdentifier(), this);
+        getTechMetadata().add(techMd);
+        return techMd;
     }
     
 }

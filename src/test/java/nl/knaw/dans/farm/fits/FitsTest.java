@@ -21,9 +21,12 @@ public class FitsTest
     
     @Test
     public void testConflict() throws Exception {
-        File file = new File("src/test/resources/test-files/DSC00323.jpg");
+        //File file = new File("src/test/resources/test-files/DSC00323.jpg");
+        //File file = new File("src/test/resources/test-files/farm.doc");
+        File file = new File("src/test/resources/test-files/05 I Heard Her Call My Name.mp3");
+        //File file = new File("src/test/resources/test-files/01_HerkenningInhoudEASY.docx");
         FitsOutput fop = FitsWrap.instance().process(file);
-        fop.output(System.err);
+        //fop.output(System.err);
         
 //        List<FitsIdentity> identities = fop.getIdentities();
 //        FitsIdentity identity = identities.get(0);
@@ -38,14 +41,20 @@ public class FitsTest
         
         //List<FitsMetadataElement> elements = fop.getFileInfoElements();
         
-        List<FitsMetadataElement> elements = fop.getMetadataElements("well-formed");
+        List<FitsMetadataElement> elements = fop.getTechMetadataElements();
+
         
         for (FitsMetadataElement element : elements) {
             System.err.println(element.getName() + " " + element.getReportingToolName() + " " + element.getStatus()
                     + " " + element.getValue());
         }
-        System.err.println(fop.hasConflictingMetadataElements("created"));
         
+        System.err.println(fop.getTechMetadataType());
+        System.err.println(fop.getErrorMessages());
+        List<Exception> exs = fop.getCaughtExceptions();
+        for (Exception ex : exs) {
+            System.err.println(ex.toString());
+        }
     }
     
 

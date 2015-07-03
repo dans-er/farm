@@ -2,6 +2,7 @@ package nl.knaw.dans.farm.fits;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import nl.knaw.dans.farm.FileInformationPackage;
@@ -25,8 +26,10 @@ public class FitsAnalyzerTest
     
     @Test
     public void testProcess() throws Exception {
-        FileInputStream fis = new FileInputStream("src/test/resources/test-files/farm.doc");
+        //FileInputStream fis = new FileInputStream("src/test/resources/test-files/farm.doc");
         //FileInputStream fis = new FileInputStream("src/test/resources/test-files/DSC00323.jpg");
+        FileInputStream fis = new FileInputStream("src/test/resources/test-files/05 I Heard Her Call My Name.mp3");
+        
         FileInformationPackage fip = new FileInformationPackage("easy-file:125");
         fip.setInutStream(fis);
         

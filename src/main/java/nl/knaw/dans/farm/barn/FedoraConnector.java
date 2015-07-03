@@ -41,6 +41,7 @@ public class FedoraConnector
                 getUser(), //
                 getPass());
         FedoraClient fedora = new FedoraClient(credentials);
+        
         FedoraRequest.setDefaultClient(fedora);
     }
     

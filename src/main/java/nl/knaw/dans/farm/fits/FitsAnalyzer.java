@@ -12,6 +12,7 @@ import nl.knaw.dans.farm.rdb.JPAUtil;
 import nl.knaw.dans.fits.FitsWrap;
 import edu.harvard.hul.ois.fits.FitsMetadataElement;
 import edu.harvard.hul.ois.fits.FitsOutput;
+import edu.harvard.hul.ois.fits.exceptions.FitsConfigurationException;
 import edu.harvard.hul.ois.fits.exceptions.FitsException;
 import edu.harvard.hul.ois.fits.identity.ExternalIdentifier;
 import edu.harvard.hul.ois.fits.identity.FitsIdentity;
@@ -22,9 +23,10 @@ public class FitsAnalyzer implements Analyzer
     
     private FitsProfileStore store;
     
-    public FitsAnalyzer()
+    public FitsAnalyzer() throws FitsConfigurationException
     {
         store = new FitsProfileStore(JPAUtil.getEntityManager());
+        FitsWrap.instance().setStatisticsEnabled(false);
     }
 
     @Override
@@ -41,14 +43,14 @@ public class FitsAnalyzer implements Analyzer
         }
         
         persistProfile(fip, fop);
-        
         try
         {
             fop.output(System.err);
         }
         catch (IOException e)
         {
-            throw new ProcessingException(e);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
     }
@@ -64,8 +66,6 @@ public class FitsAnalyzer implements Analyzer
             profile.update(fip);
         }
         updateProfile(fip, fop, profile);
-        
-        
         store.saveOrUpdate(profile);
         tx.commit();
     }
@@ -74,9 +74,10 @@ public class FitsAnalyzer implements Analyzer
     {
         updateIdentification(fip, fop, profile);
         updateFileInfo(fip, fop, profile);
-        
+        updateFileStatus(fip, fop, profile);
+        updateTechMetadata(fip, fop, profile);
     }
-
+    
     private void updateIdentification(FileInformationPackage fip, FitsOutput fop, FitsProfile profile)
     {
         // add mediaTypes
@@ -126,5 +127,33 @@ public class FitsAnalyzer implements Analyzer
         }
     }
 
+    private void updateFileStatus(FileInformationPackage fip, FitsOutput fop, FitsProfile profile)
+    {
+        profile.getFileStatus().clear();
+        for (FitsMetadataElement el : fop.getFileStatusElements()) {
+            FitsFileStatus ffs = new FitsFileStatus();
+            ffs.setElementName(el.getName());
+            ffs.setToolName(el.getReportingToolName());
+            ffs.setToolVersion(el.getReportingToolVersion());
+            ffs.setStatus(el.getStatus());
+            ffs.setValue(el.getValue());
+            profile.addFileStat(ffs);
+        }   
+    }
     
+    private void updateTechMetadata(FileInformationPackage fip, FitsOutput fop, FitsProfile profile)
+    {
+        profile.setType(fop.getTechMetadataType());
+        profile.getTechMetadata().clear();
+        for (FitsMetadataElement el : fop.getTechMetadataElements()) {
+            FitsTechMetadata ftmd = new FitsTechMetadata();
+            ftmd.setElementName(el.getName());
+            ftmd.setToolName(el.getReportingToolName());
+            ftmd.setToolVersion(el.getReportingToolVersion());
+            ftmd.setStatus(el.getStatus());
+            ftmd.setValue(el.getValue());
+            profile.addTechMd(ftmd);
+        }
+    }
+
 }
