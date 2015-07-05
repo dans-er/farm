@@ -18,7 +18,8 @@ import nl.knaw.dans.farm.ResourceProfile;
 import nl.knaw.dans.farm.rdb.DBEntity;
 
 @Entity
-@Table(name = "profile", indexes = {@Index(columnList="fedora_identifier")})
+@Table(name = "profile", indexes = {
+        @Index(name = "profile_fedora_identifier_index", columnList="fedora_identifier", unique = true)})
 public class Profile extends DBEntity
 {
     

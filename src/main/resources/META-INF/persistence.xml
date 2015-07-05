@@ -8,6 +8,7 @@
 
 		<class>nl.knaw.dans.farm.fed.Profile</class>
 		<class>nl.knaw.dans.farm.fits.FitsProfile</class>
+		<class>nl.knaw.dans.farm.tika.TikaProfile</class>
 
 
 		<properties>
@@ -35,7 +36,7 @@
 
 		<class>nl.knaw.dans.farm.fed.Profile</class>
 		<class>nl.knaw.dans.farm.fits.FitsProfile</class>
-		<class>nl.knaw.dans.farm.fits.FitsMediatype</class>
+		<class>nl.knaw.dans.farm.tika.TikaProfile</class>
 
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />

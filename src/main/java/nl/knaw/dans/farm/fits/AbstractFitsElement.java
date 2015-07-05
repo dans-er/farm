@@ -121,7 +121,7 @@ public abstract class AbstractFitsElement implements Serializable
     {
         if(obj == this) return true;
         if(obj == null) return false;
-        if (obj instanceof FitsMediatype) {
+        if (obj instanceof AbstractFitsElement) {
             AbstractFitsElement other = (AbstractFitsElement) obj;
             return new EqualsBuilder()
                 .append(identifier, other.identifier)

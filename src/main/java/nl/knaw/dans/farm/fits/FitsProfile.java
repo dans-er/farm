@@ -20,7 +20,9 @@ import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "fitsprofile", indexes = {@Index(columnList="fedora_identifier")})
+@Table(name = "fitsprofile", indexes = {
+        @Index(name = "fitsprofile_fedora_identifier_index", columnList="fedora_identifier", unique = true)
+        })
 public class FitsProfile extends DBEntity
 {
     

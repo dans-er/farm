@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.tika.language.LanguageIdentifier;
 import org.apache.tika.language.LanguageProfile;
 
+@Deprecated
 public class LanguageAnalyzer implements Analyzer
 {
     

@@ -1,4 +1,4 @@
-package nl.knaw.dans.farm.fits;
+package nl.knaw.dans.farm.tika;
 
 import static org.junit.Assert.assertTrue;
 
@@ -7,37 +7,39 @@ import java.io.IOException;
 import nl.knaw.dans.farm.FileInformationPackage;
 import nl.knaw.dans.farm.FileMetadata;
 import nl.knaw.dans.farm.rdb.JPAUtil;
-import nl.knaw.dans.fits.FitsWrap;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.schlichtherle.io.FileInputStream;
 
-public class FitsAnalyzerTest
+public class TikaAnalyzerTest
 {
     
     @BeforeClass
     public static void beforeClass() {
-        FitsWrap.setFitsHome("/Users/ecco/git/fits-api/fits-0.8.5");
         JPAUtil.setTestState(true);
     }
     
     @Test
     public void testProcess() throws Exception {
-        //FileInputStream fis = new FileInputStream("src/test/resources/test-files/farm.svg");
-        //FileInputStream fis = new FileInputStream("src/test/resources/test-files/DSC00323.jpg");
-        FileInputStream fis = new FileInputStream("src/test/resources/test-files/05 I Heard Her Call My Name.mp3");
+        //String filename = "farm.svg";
+        //String filename = "01_HerkenningInhoudEASY.docx";
+        String filename = "DSC00323.jpg";
+        //String filename = "05 I Heard Her Call My Name.mp3";
+
+        FileInputStream fis = new FileInputStream("src/test/resources/test-files/" + filename);
         
         FileInformationPackage fip = new FileInformationPackage("easy-file:125");
         fip.setInutStream(fis);
         
         FileMetadata fmd = new FileMetadata();
-        fmd.setFilename("DSC00323.jpg");
+        fmd.setFilename(filename);
         fip.setFileMetadata(fmd);
         
-        FitsAnalyzer fana = new FitsAnalyzer();
-        fana.process(fip);
+        TikaAnalyzer tana = new TikaAnalyzer();
+        tana.addHandler(new MetadataHandler());
+        tana.process(fip);
         
         fip.close();
         
