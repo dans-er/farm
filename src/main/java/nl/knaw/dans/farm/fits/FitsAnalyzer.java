@@ -43,15 +43,15 @@ public class FitsAnalyzer implements Analyzer
         }
         
         persistProfile(fip, fop);
-        try
-        {
-            fop.output(System.err);
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//        try
+//        {
+//            fop.output(System.err);
+//        }
+//        catch (IOException e)
+//        {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
 
     }
 

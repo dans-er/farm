@@ -46,11 +46,5 @@ public class DatePointerIteratorTest extends AbstractFedoraTest
         }
     }
     
-    @Test
-    public void testSpecificFile() throws Exception {
-        DatePointerIterator dpi = new DatePointerIterator();
-        FileInformationPackage fip = dpi.getFileInformationPackage("easy-file:285107");
-        
-    }
     
 }

@@ -46,8 +46,12 @@ public class MetadataHandler extends FarmHandler
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
     {
         if (isMeta(uri, localName)) {
+            String name = atts.getValue("name");
             String content = StringUtils.abbreviate(atts.getValue("content"), MAX_CONTENT_LENGTH);
-            currentProfile.addMeta(new TikaMeta(atts.getValue("name"), content));
+            currentProfile.addMeta(new TikaMeta(name, content));
+            if ("Content-Type".equals(name)) {
+                currentProfile.setContentType(content);
+            }
         }
     }
     

@@ -5,9 +5,11 @@ import nl.knaw.dans.farm.barn.DatePointerIterator;
 import nl.knaw.dans.farm.barn.FedoraConnector;
 import nl.knaw.dans.farm.fed.ProfileAnalyzer;
 import nl.knaw.dans.farm.fits.FitsAnalyzer;
+import nl.knaw.dans.farm.tika.MetadataHandler;
+import nl.knaw.dans.farm.tika.TikaAnalyzer;
 import nl.knaw.dans.fits.FitsWrap;
 
-public class FarmApp
+public class FarmAppFixed
 {
 
     public static void main(String[] args) throws Exception
@@ -23,7 +25,11 @@ public class FarmApp
         
         FitsWrap.setFitsHome("/Users/ecco/git/fits-api/fits-0.8.5");
         FitsAnalyzer fitsAnalyzer = new FitsAnalyzer();
-        conveyor.addAnalyzer(1, fitsAnalyzer);
+        conveyor.addAnalyzer(0, fitsAnalyzer);
+        
+        TikaAnalyzer tikaAnalyzer = new TikaAnalyzer();
+        tikaAnalyzer.addHandler(new MetadataHandler());
+        conveyor.addAnalyzer(1, tikaAnalyzer);
         
         conveyor.run();
     }

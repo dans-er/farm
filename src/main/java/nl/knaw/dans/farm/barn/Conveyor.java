@@ -45,6 +45,7 @@ public class Conveyor
     public void run() {
         while (fileIterator.hasNext()) {
             FileInformationPackage fip = fileIterator.next();
+            logger.info("Processing {}", fip.getIdentifier());
             try
             {
                 for (Analyzer analyzer : analyzers) {

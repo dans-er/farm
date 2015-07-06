@@ -43,6 +43,12 @@ public class TikaProfile extends DBEntity
     @Column(name = "type")
     private String type;
     
+    @Column(name = "subtype")
+    private String subtype;
+    
+    @Column(name = "parameters")
+    private String parameters;
+    
     protected TikaProfile() {}
     
     public TikaProfile(FileInformationPackage fip) {
@@ -75,9 +81,22 @@ public class TikaProfile extends DBEntity
         return type;
     }
 
-    public void setType(String type)
+    public String getSubtype()
     {
-        this.type = type;
+        return subtype;
+    }
+
+    public void setContentType(String contentType)
+    {
+        String[] types = contentType.split("/");
+        this.type = types[0];
+        if (types.length > 1) {
+            String[] subs = types[1].split(";");
+            this.subtype = subs[0];
+            if (subs.length > 1) {
+                this.parameters = subs[1].trim();
+            }
+        }
     }
     
     public Set<TikaMeta> getMetadata() {
