@@ -36,6 +36,7 @@ public class DatePointerIterator extends FedoraFileIterator
     public FileInformationPackage next()
     {
         counter += 1;
+        logger.info("Fip " + counter + " for " + getFormat().print(datePointer));
         return super.next();
     }
     

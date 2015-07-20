@@ -9,8 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "fitsfilestatus", indexes = {
-        @Index(name = "fitsfilestatus_fedora_identifier_index", columnList = "fedora_identifier", unique = false),
-        @Index(name = "fitsfilestatus_element_name_index", columnList = "element_name", unique = false)
+        @Index(name = "fitsfilestatus_fedora_identifier_index", columnList = "fedora_identifier", unique = false)
 })
 public class FitsFileStatus extends AbstractFitsElement
 {

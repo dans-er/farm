@@ -6,11 +6,13 @@ import java.util.List;
 import nl.knaw.dans.fits.FitsWrap;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.harvard.hul.ois.fits.FitsMetadataElement;
 import edu.harvard.hul.ois.fits.FitsOutput;
 
+@Ignore
 public class FitsTest
 {
     

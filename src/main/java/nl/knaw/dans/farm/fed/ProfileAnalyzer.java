@@ -2,6 +2,9 @@ package nl.knaw.dans.farm.fed;
 
 import javax.persistence.EntityTransaction;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nl.knaw.dans.farm.Analyzer;
 import nl.knaw.dans.farm.FileInformationPackage;
 import nl.knaw.dans.farm.ProcessingException;
@@ -11,6 +14,8 @@ public class ProfileAnalyzer implements Analyzer
 {
     
     private ProfileStore store;
+    
+    private Logger logger = LoggerFactory.getLogger(ProfileAnalyzer.class);
     
     public ProfileAnalyzer()
     {
@@ -22,14 +27,23 @@ public class ProfileAnalyzer implements Analyzer
     {
         EntityTransaction tx = store.newTransAction();
         tx.begin();
-        Profile profile = store.findByNaturalId(fip.getIdentifier());
-        if (profile == null) {
-            profile = new Profile(fip);
-        } else {
-            profile.update(fip);
+        try
+        {
+            Profile profile = store.findByNaturalId(fip.getIdentifier());
+            if (profile == null) {
+                profile = new Profile(fip);
+            } else {
+                profile.update(fip);
+            }
+            store.saveOrUpdate(profile);
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+            throw e;
+        } finally {
+            store.clear();
         }
-        store.saveOrUpdate(profile);
-        tx.commit();
+        logger.debug("processed " + fip.getIdentifier());
     }
     
 

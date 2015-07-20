@@ -2,13 +2,21 @@ package nl.knaw.dans.farm.barn;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import nl.knaw.dans.farm.Analyzer;
 import nl.knaw.dans.farm.FileInformationPackage;
 import nl.knaw.dans.farm.FileIterator;
+import nl.knaw.dans.farm.ProcessingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Conveyor
 {
@@ -17,6 +25,7 @@ public class Conveyor
     
     private final FileIterator fileIterator;
     private List<Analyzer> analyzers = new ArrayList<Analyzer>();
+    private Reporter reporter;
     
     
     public Conveyor(FileIterator fileIterator) {
@@ -42,23 +51,73 @@ public class Conveyor
         return fileIterator;
     }
     
-    public void run() {
+    public void run() throws Exception {
+        int errorCount = 0;
+        int fileCount = 0;
         while (fileIterator.hasNext()) {
+            
             FileInformationPackage fip = fileIterator.next();
-            logger.info("Processing {}", fip.getIdentifier());
+            logger.info("Processing {}", fip.getIdentifier() + " errorCount=" + errorCount + " fileCount=" + fileCount);
             try
             {
-                for (Analyzer analyzer : analyzers) {
-                    analyzer.process(fip);
+                for (Analyzer analyzer : analyzers) {  
+                    errorCount += tryProcess(fip, analyzer);
                 }
             }
             catch (Exception e)
             {
                 logger.error("Caught Exception: ", e);
+                throw e;
             } finally {
                 fip.close();
             }
+            fileCount += 1;
         }
+    }
+
+    protected int tryProcess(FileInformationPackage fip, Analyzer analyzer)
+    {
+        try
+        {
+            execute(fip, analyzer);
+            return 0;
+        }
+        catch (Exception e)
+        {
+            logger.error("While processing " + fip.getIdentifier(), e);
+            getReporter().reportError(fip.getIdentifier(), fip.getFileMetadata().getFilename(), e);
+            return 1;
+        }
+    }
+    
+    protected void execute(final FileInformationPackage fip, final Analyzer analyzer) throws ProcessingException, InterruptedException, ExecutionException, TimeoutException {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        Callable<Object> task = new Callable<Object>()
+        {
+            
+
+            @Override
+            public Object call() throws Exception
+            {
+                analyzer.process(fip);
+                return null;
+            }
+        };
+        Future<Object> future = executor.submit(task);
+        future.get(15, TimeUnit.SECONDS);
+    }
+
+    public Reporter getReporter()
+    {
+        if (reporter == null) {
+            reporter = new Reporter();
+        }
+        return reporter;
+    }
+
+    public void setReporter(Reporter reporter)
+    {
+        this.reporter = reporter;
     }
     
     

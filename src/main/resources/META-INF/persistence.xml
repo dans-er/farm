@@ -17,7 +17,8 @@
 
 			<property name="hibernate.connection.username" value="farmuser" />
 			<property name="hibernate.connection.password" value="farmpass" />
-			<property name="hibernate.connection.url" value="jdbc:mysql://172.16.215.127/farm" />
+			<!-- property name="hibernate.connection.url" value="jdbc:mysql://172.16.215.127/farm" /-->
+			<property name="hibernate.connection.url" value="jdbc:mysql://localhost/farm" />
 
 			<!-- validate | update | create | create-drop -->
 			<property name="hibernate.hbm2ddl.auto" value="update" />

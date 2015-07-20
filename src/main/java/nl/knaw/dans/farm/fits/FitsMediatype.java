@@ -9,8 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "fitsmediatype", indexes = {
-        @Index(name = "fitsmediatype_fedora_identifier_index", columnList = "fedora_identifier", unique = false),
-        @Index(name = "fitsmediatype_element_name_index", columnList = "element_name", unique = false)
+        @Index(name = "fitsmediatype_fedora_identifier_index", columnList = "fedora_identifier", unique = false)
 })
 public class FitsMediatype extends AbstractFitsElement
 {

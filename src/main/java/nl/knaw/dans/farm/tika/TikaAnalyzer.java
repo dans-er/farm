@@ -12,6 +12,9 @@ import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.PasswordProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -22,6 +25,8 @@ public class TikaAnalyzer implements Analyzer, ContentHandler
     
     private final AutoDetectParser parser;
     private List<FarmHandler> handlers = new ArrayList<FarmHandler>();
+    
+    private Logger logger = LoggerFactory.getLogger(TikaAnalyzer.class);
     
     public TikaAnalyzer()
     {
@@ -52,8 +57,16 @@ public class TikaAnalyzer implements Analyzer, ContentHandler
         metadata.set(Metadata.RESOURCE_NAME_KEY, fip.getFileMetadata().getFilename());
         
         ParseContext context = new ParseContext();
+        context.set(PasswordProvider.class, new PasswordProvider()
+        {
+            
+            @Override
+            public String getPassword(Metadata metadata)
+            {
+                return null;
+            }
+        });
         
-        //TestHandler handler = new TestHandler();
         ContentHandler handler = this;
         
         try
@@ -65,6 +78,7 @@ public class TikaAnalyzer implements Analyzer, ContentHandler
         {
             throw new ProcessingException(e);
         }
+        logger.debug("processed " + fip.getIdentifier());
     }
     
     @Override

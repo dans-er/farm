@@ -84,7 +84,7 @@ public class FedoraFileIteratorTest extends AbstractFedoraTest
     }
     
     @Test
-    public void testNext() {
+    public void testNext() throws Exception {
         int maxCount = 30;
         int count = 0;
         FedoraFileIterator iter = new FedoraFileIterator();

@@ -9,10 +9,12 @@ import nl.knaw.dans.farm.FileMetadata;
 import nl.knaw.dans.farm.rdb.JPAUtil;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.schlichtherle.io.FileInputStream;
 
+@Ignore
 public class TikaAnalyzerTest
 {
     

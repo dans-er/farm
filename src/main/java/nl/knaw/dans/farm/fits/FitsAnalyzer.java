@@ -10,6 +10,11 @@ import nl.knaw.dans.farm.FileInformationPackage;
 import nl.knaw.dans.farm.ProcessingException;
 import nl.knaw.dans.farm.rdb.JPAUtil;
 import nl.knaw.dans.fits.FitsWrap;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.harvard.hul.ois.fits.FitsMetadataElement;
 import edu.harvard.hul.ois.fits.FitsOutput;
 import edu.harvard.hul.ois.fits.exceptions.FitsConfigurationException;
@@ -22,6 +27,14 @@ public class FitsAnalyzer implements Analyzer
 {
     
     private FitsProfileStore store;
+    private Logger logger = LoggerFactory.getLogger(FitsAnalyzer.class);
+    
+    
+    public FitsAnalyzer(String fitsHome) throws FitsConfigurationException {
+        FitsWrap.setFitsHome(fitsHome);
+        store = new FitsProfileStore(JPAUtil.getEntityManager());
+        FitsWrap.instance().setStatisticsEnabled(false);
+    }
     
     public FitsAnalyzer() throws FitsConfigurationException
     {
@@ -32,9 +45,15 @@ public class FitsAnalyzer implements Analyzer
     @Override
     public void process(FileInformationPackage fip) throws ProcessingException
     {
+        
+        if (fip.getFileMetadata().getFilename().endsWith(".pdf")) {
+            checkPDF(fip);
+        }
+        
         FitsOutput fop;
         try
         {
+            
             fop = FitsWrap.instance().process(fip.getFile());
         }
         catch (FitsException | IOException e)
@@ -43,31 +62,66 @@ public class FitsAnalyzer implements Analyzer
         }
         
         persistProfile(fip, fop);
-//        try
-//        {
-//            fop.output(System.err);
-//        }
-//        catch (IOException e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-
+        logger.debug("processed " + fip.getIdentifier());
     }
+
+    //The FITS apache-tika thread sometimes hangs or kills the VM on parsing certain pdf documents.
+    private void checkPDF(FileInformationPackage fip) throws ProcessingException
+    {
+        //logger.info(fip.getFileMetadata().getFilename());
+        PDDocument document = null;
+        try
+        {
+            document = PDDocument.load(fip.getFile());
+            if (document.isEncrypted()) {
+                logger.info("Document is encrypted");
+                throw new ProcessingException(fip.getIdentifier() + " " + fip.getFileMetadata().getFilename() + " is encrypted. Not processing through FITS.");
+                
+            }
+        }
+        catch (IOException e1)
+        {
+            throw new ProcessingException(e1);
+        } finally {
+            if (document != null) {
+                closeDoc(document);
+            }
+        }
+    }
+    
+    private void closeDoc(PDDocument document) throws ProcessingException
+      {
+          try
+          {
+              document.close();
+          }
+          catch (IOException e)
+          {
+              throw new ProcessingException(e);
+          }
+      }
 
     private void persistProfile(FileInformationPackage fip, FitsOutput fop)
     {
         EntityTransaction tx = store.newTransAction();
         tx.begin();
-        FitsProfile profile = store.findByNaturalId(fip.getIdentifier());
-        if (profile == null) {
-            profile = new FitsProfile(fip);
-        } else {
-            profile.update(fip);
+        try
+        {
+            FitsProfile profile = store.findByNaturalId(fip.getIdentifier());
+            if (profile == null) {
+                profile = new FitsProfile(fip);
+            } else {
+                profile.update(fip);
+            }
+            updateProfile(fip, fop, profile);
+            store.saveOrUpdate(profile);
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+            throw e;
+        } finally {       
+            store.clear();
         }
-        updateProfile(fip, fop, profile);
-        store.saveOrUpdate(profile);
-        tx.commit();
     }
 
     private void updateProfile(FileInformationPackage fip, FitsOutput fop, FitsProfile profile)
@@ -145,14 +199,16 @@ public class FitsAnalyzer implements Analyzer
     {
         profile.setType(fop.getTechMetadataType());
         profile.getTechMetadata().clear();
-        for (FitsMetadataElement el : fop.getTechMetadataElements()) {
-            FitsTechMetadata ftmd = new FitsTechMetadata();
-            ftmd.setElementName(el.getName());
-            ftmd.setToolName(el.getReportingToolName());
-            ftmd.setToolVersion(el.getReportingToolVersion());
-            ftmd.setStatus(el.getStatus());
-            ftmd.setValue(el.getValue());
-            profile.addTechMd(ftmd);
+        if (fop.getTechMetadataElements() != null) {
+            for (FitsMetadataElement el : fop.getTechMetadataElements()) {
+                FitsTechMetadata ftmd = new FitsTechMetadata();
+                ftmd.setElementName(el.getName());
+                ftmd.setToolName(el.getReportingToolName());
+                ftmd.setToolVersion(el.getReportingToolVersion());
+                ftmd.setStatus(el.getStatus());
+                ftmd.setValue(el.getValue());
+                profile.addTechMd(ftmd);
+            }
         }
     }
 

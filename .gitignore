@@ -16,4 +16,5 @@ buildNumber
 .settings/
 datepointer.txt
 non-pub/
+logs/
 

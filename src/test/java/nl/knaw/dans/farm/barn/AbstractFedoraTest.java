@@ -16,7 +16,7 @@ import com.yourmediashelf.fedora.client.request.DescribeRepository;
 import com.yourmediashelf.fedora.client.request.FedoraRequest;
 import com.yourmediashelf.fedora.client.response.DescribeRepositoryResponse;
 
-public class AbstractFedoraTest
+public abstract class AbstractFedoraTest
 {
     
     public static final String FEDORA_VERSION = "3.5";

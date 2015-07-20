@@ -11,9 +11,10 @@ import javax.persistence.EntityTransaction;
 import nl.knaw.dans.farm.rdb.JPAUtil;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-
+@Ignore
 public class ProfileStoreTest
 {
     @BeforeClass

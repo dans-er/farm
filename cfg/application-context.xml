@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd">
+	   					   
+	<bean id="fedora-connector" class="nl.knaw.dans.farm.barn.FedoraConnector">
+		<!-- ### VALUE(S) REQUIRED ### -->
+		<!-- fedora server, user and password -->
+		<property name="host" value="host"/>
+		<property name="port" value="1234"/>
+		<property name="path" value="path"/>
+		<property name="user" value="user"/>
+		<property name="pass" value="pass"/>
+	</bean>
+	
+	<bean id="file-iterator" class="nl.knaw.dans.farm.barn.DatePointerIterator">
+		<!-- ### VALUE(S) REQUIRED ### -->
+		<!-- DatePointerIterator uses this file to write successive processed dates/file counts -->
+		<property name="fileLocation" value="datepointer.csv"/>
+		
+		<property name="identifierFilter" ref="profile_identifier_filter" />
+	</bean>
+	
+	<bean id="profile_identifier_filter" class="nl.knaw.dans.farm.fed.ProfileIdentifierFilter"/>
+
+    <bean id="conveyor" class="nl.knaw.dans.farm.barn.Conveyor">
+    	<constructor-arg ref="file-iterator"/>
+    	<property name="analyzers">
+    		<list>
+    			<ref bean="profile-analyzer"/>
+    			<ref bean="fits-analyzer"/>
+    			<ref bean="tika-analyzer"/>
+    		</list>
+    	</property>
+    </bean>
+    
+    <bean id="profile-analyzer" class="nl.knaw.dans.farm.fed.ProfileAnalyzer"/>
+    
+    <bean id="fits-analyzer" class="nl.knaw.dans.farm.fits.FitsAnalyzer">
+    	<!-- ### VALUE(S) REQUIRED ### -->
+    	<!-- the FITS installation on the system, can be a git clone: {}/git/fits-api/fits-0.8.5 -->
+    	<!-- See: https://github.com/dans-er/fits-api -->
+    	<constructor-arg value="fits/home"/>
+    </bean>
+    
+    <bean id="tika-analyzer" class="nl.knaw.dans.farm.tika.TikaAnalyzer">
+    	<property name="handlers">
+    		<list>
+    			<ref bean="metadata-handler"/>
+    		</list>
+    	</property>
+    </bean>
+    
+    <bean id="metadata-handler" class="nl.knaw.dans.farm.tika.MetadataHandler"/>
+
+</beans>

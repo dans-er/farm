@@ -3,11 +3,12 @@ package nl.knaw.dans.farm;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
-import nl.knaw.dans.farm.utils.UnclosableBufferedInputStream;
+import de.schlichtherle.io.FileInputStream;
 
 public class FileInformationPackage
 {
@@ -23,10 +24,11 @@ public class FileInformationPackage
     private FileMetadata fileMetadata;
     private ResourceProfile resourceProfile;
     private FileProfile fileProfile;
-    private InputStream ins;
-    private UnclosableBufferedInputStream bins;
+    //private InputStream ins;
+    //private UnclosableBufferedInputStream bins;
     private FarmData farmData;
     private File file;
+    private List<InputStream> streams = new ArrayList<InputStream>();
     
     public FileInformationPackage(String identifier) {
         this.identifier = identifier;
@@ -67,14 +69,14 @@ public class FileInformationPackage
 
     public File getFile() throws IOException
     {
-        if (file == null) {
-            String filename = getFileMetadata().getFilename();
-            if (filename == null | "".equals(filename)) {
-                filename = "tmp.file";
-            }
-            file = new File(getWorkDir(), filename);
-            FileUtils.copyInputStreamToFile(getInputStream(), file);
-        }
+//        if (file == null) {
+//            String filename = getFileMetadata().getFilename();
+//            if (filename == null | "".equals(filename)) {
+//                filename = "tmp.file";
+//            }
+//            file = new File(getWorkDir(), filename);
+//            FileUtils.copyInputStreamToFile(getInputStream(), file);
+//        }
         return file;
     }
 
@@ -83,18 +85,31 @@ public class FileInformationPackage
         return farmData;
     }
     
-    public void setInutStream(InputStream ins) {
-        this.ins = ins;
-        bins = new UnclosableBufferedInputStream(ins);
+    public void setInutStream(InputStream ins) throws IOException {
+//        this.ins = ins;
+//        bins = new UnclosableBufferedInputStream(ins);
+        String filename = getFileMetadata().getFilename();
+        if (filename == null | "".equals(filename)) {
+            filename = "tmp.file";
+        }
+        file = new File(getWorkDir(), filename);
+        FileUtils.copyInputStreamToFile(ins, file);
     }
     
     public InputStream getInputStream() throws IOException {
-        bins.reset();
-        return bins;
+//        bins.reset();
+//        return bins;
+        InputStream fis = new FileInputStream(file);
+        streams.add(fis);
+        return fis;
     }
     
-    public void close() {
-        IOUtils.closeQuietly(ins);
+    public void close() throws IOException {
+        //IOUtils.closeQuietly(ins);
+        for (InputStream is : streams) {
+            is.close();
+        }
+        streams.clear();
         if (file != null) {
             file.delete();
         }

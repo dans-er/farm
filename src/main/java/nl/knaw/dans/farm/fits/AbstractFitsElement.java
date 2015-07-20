@@ -6,29 +6,32 @@ import javax.persistence.Column;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.hibernate.annotations.NaturalId;
 
 @MappedSuperclass
 public abstract class AbstractFitsElement implements Serializable
 {
+    
+ // the field length in the database
+    public static final int MAX_CONTENT_LENGTH = 255;
 
     private static final long serialVersionUID = 5063810653122695253L;
 
-    @NaturalId
+    //@NaturalId
     @Column(name = "fedora_identifier", nullable = false)
     private String identifier;
     
-    @NaturalId
+    //@NaturalId
     @Column(name = "element_name", nullable = false)
     private String elementName;
     
-    @NaturalId
+    //@NaturalId
     @Column(name = "tool_name", nullable = false)
     private String toolName;
     
-    @NaturalId
+    //@NaturalId
     @Column(name = "tool_version", nullable = false)
     private String toolVersion;
     
@@ -113,7 +116,7 @@ public abstract class AbstractFitsElement implements Serializable
 
     public void setValue(String value)
     {
-        this.value = value;
+        this.value = StringUtils.abbreviate(value, MAX_CONTENT_LENGTH);
     }
 
     @Override
