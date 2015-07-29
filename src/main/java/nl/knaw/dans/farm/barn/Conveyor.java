@@ -21,16 +21,16 @@ import org.slf4j.LoggerFactory;
 
 public class Conveyor
 {
-    
+
     private static Logger logger = LoggerFactory.getLogger(Conveyor.class);
-    
+
     private final FileIterator fileIterator;
     private List<Analyzer> analyzers = new ArrayList<Analyzer>();
     private List<Discriminator> discriminators = new ArrayList<Discriminator>();
     private Reporter reporter;
-    
-    
-    public Conveyor(FileIterator fileIterator) {
+
+    public Conveyor(FileIterator fileIterator)
+    {
         this.fileIterator = fileIterator;
     }
 
@@ -43,8 +43,9 @@ public class Conveyor
     {
         this.analyzers = analyzers;
     }
-    
-    public void addAnalyzer(int index, Analyzer analyzer) {
+
+    public void addAnalyzer(int index, Analyzer analyzer)
+    {
         analyzers.add(index, analyzer);
     }
 
@@ -62,38 +63,48 @@ public class Conveyor
     {
         return fileIterator;
     }
-    
-    public void run() throws Exception {
+
+    public void run() throws Exception
+    {
         int errorCount = 0;
         int fileCount = 0;
-        while (fileIterator.hasNext()) {
-            
+        while (fileIterator.hasNext())
+        {
+
             FileInformationPackage fip = fileIterator.next();
-            if (isAccepted(fip)) {
-                logger.info("Processing {}", fip.getIdentifier() + " errorCount=" + errorCount + " fileCount=" + fileCount);
-                try
+
+            logger.info("Processing {}", fip.getIdentifier() + " errorCount=" + errorCount + " fileCount=" + fileCount);
+            try
+            {
+                if (isAccepted(fip))
                 {
-                    for (Analyzer analyzer : analyzers) {  
+                    for (Analyzer analyzer : analyzers)
+                    {
                         errorCount += tryProcess(fip, analyzer);
                     }
                 }
-                catch (Exception e)
-                {
-                    logger.error("Caught Exception: ", e);
-                    throw e;
-                } finally {
-                    fip.close();
-                }
-                fileCount += 1;
             }
+            catch (Exception e)
+            {
+                logger.error("Caught Exception: ", e);
+                throw e;
+            }
+            finally
+            {
+                fip.close();
+            }
+            fileCount += 1;
+
         }
     }
 
     private boolean isAccepted(FileInformationPackage fip)
     {
         boolean accepted = true;
-        for (Discriminator discriminator : getDiscriminators()) {
-            if (!discriminator.accept(fip)) {
+        for (Discriminator discriminator : getDiscriminators())
+        {
+            if (!discriminator.accept(fip))
+            {
                 accepted = false;
                 break;
             }
@@ -115,12 +126,13 @@ public class Conveyor
             return 1;
         }
     }
-    
-    protected void execute(final FileInformationPackage fip, final Analyzer analyzer) throws ProcessingException, InterruptedException, ExecutionException, TimeoutException {
+
+    protected void execute(final FileInformationPackage fip, final Analyzer analyzer) throws ProcessingException, InterruptedException, ExecutionException,
+            TimeoutException
+    {
         ExecutorService executor = Executors.newCachedThreadPool();
         Callable<Object> task = new Callable<Object>()
         {
-            
 
             @Override
             public Object call() throws Exception
@@ -135,7 +147,8 @@ public class Conveyor
 
     public Reporter getReporter()
     {
-        if (reporter == null) {
+        if (reporter == null)
+        {
             reporter = new Reporter();
         }
         return reporter;
@@ -145,7 +158,5 @@ public class Conveyor
     {
         this.reporter = reporter;
     }
-    
-    
 
 }
