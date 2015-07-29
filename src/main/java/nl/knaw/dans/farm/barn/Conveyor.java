@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import nl.knaw.dans.farm.Analyzer;
+import nl.knaw.dans.farm.Discriminator;
 import nl.knaw.dans.farm.FileInformationPackage;
 import nl.knaw.dans.farm.FileIterator;
 import nl.knaw.dans.farm.ProcessingException;
@@ -25,6 +26,7 @@ public class Conveyor
     
     private final FileIterator fileIterator;
     private List<Analyzer> analyzers = new ArrayList<Analyzer>();
+    private List<Discriminator> discriminators = new ArrayList<Discriminator>();
     private Reporter reporter;
     
     
@@ -46,6 +48,16 @@ public class Conveyor
         analyzers.add(index, analyzer);
     }
 
+    public List<Discriminator> getDiscriminators()
+    {
+        return discriminators;
+    }
+
+    public void setDiscriminators(List<Discriminator> discriminators)
+    {
+        this.discriminators = discriminators;
+    }
+
     public FileIterator getFileIterator()
     {
         return fileIterator;
@@ -57,22 +69,36 @@ public class Conveyor
         while (fileIterator.hasNext()) {
             
             FileInformationPackage fip = fileIterator.next();
-            logger.info("Processing {}", fip.getIdentifier() + " errorCount=" + errorCount + " fileCount=" + fileCount);
-            try
-            {
-                for (Analyzer analyzer : analyzers) {  
-                    errorCount += tryProcess(fip, analyzer);
+            if (isAccepted(fip)) {
+                logger.info("Processing {}", fip.getIdentifier() + " errorCount=" + errorCount + " fileCount=" + fileCount);
+                try
+                {
+                    for (Analyzer analyzer : analyzers) {  
+                        errorCount += tryProcess(fip, analyzer);
+                    }
                 }
+                catch (Exception e)
+                {
+                    logger.error("Caught Exception: ", e);
+                    throw e;
+                } finally {
+                    fip.close();
+                }
+                fileCount += 1;
             }
-            catch (Exception e)
-            {
-                logger.error("Caught Exception: ", e);
-                throw e;
-            } finally {
-                fip.close();
-            }
-            fileCount += 1;
         }
+    }
+
+    private boolean isAccepted(FileInformationPackage fip)
+    {
+        boolean accepted = true;
+        for (Discriminator discriminator : getDiscriminators()) {
+            if (!discriminator.accept(fip)) {
+                accepted = false;
+                break;
+            }
+        }
+        return accepted;
     }
 
     protected int tryProcess(FileInformationPackage fip, Analyzer analyzer)

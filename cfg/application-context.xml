@@ -33,7 +33,14 @@
     			<ref bean="tika-analyzer"/>
     		</list>
     	</property>
+    	<property name="discriminators">
+    		<list>
+    			<ref bean="dataset-discriminator"/>
+    		</list>
+    	</property>
     </bean>
+    
+    <bean id="dataset-discriminator" class="nl.knaw.dans.farm.barn.DatasetDiscriminator"/>
     
     <bean id="profile-analyzer" class="nl.knaw.dans.farm.fed.ProfileAnalyzer"/>
     
