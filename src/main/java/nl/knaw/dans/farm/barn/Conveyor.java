@@ -130,7 +130,7 @@ public class Conveyor
             }
         };
         Future<Object> future = executor.submit(task);
-        future.get(15, TimeUnit.SECONDS);
+        future.get(300, TimeUnit.SECONDS);
     }
 
     public Reporter getReporter()

@@ -36,7 +36,7 @@ import com.yourmediashelf.fedora.client.response.GetObjectProfileResponse;
 public class FedoraFileIterator implements FileIterator
 {
     
-    public static final int MAX_RESULTS = 25;
+    public static final int MAX_RESULTS = 10;
     public static final int MAX_TRY_COUNT = 3;
     
     private static Logger logger = LoggerFactory.getLogger(FedoraFileIterator.class);
