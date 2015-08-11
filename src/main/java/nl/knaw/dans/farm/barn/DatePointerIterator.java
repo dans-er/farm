@@ -146,6 +146,13 @@ public class DatePointerIterator extends FedoraFileIterator
             .toString();
     }
     
+    @Override
+    public int getMaxTryCount()
+    {
+        // get all identifiers for the given date
+        return 1000000;
+    }
+    
     private DateTimeFormatter getFormat() {
         if (format == null) {
             format = DateTimeFormat.forPattern("yyyy-MM-dd");

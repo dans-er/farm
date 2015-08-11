@@ -73,7 +73,7 @@ public class Conveyor
 
             FileInformationPackage fip = fileIterator.next();
 
-            logger.info("Processing {}", fip.getIdentifier() + " errorCount=" + errorCount + " fileCount=" + fileCount);
+            logger.info("Processing {}", fip.getIdentifier() + " errorCount=" + errorCount + " fileCount=" + fileCount + " " + fip.getFileMetadata().getFilename());
             try
             {
                 if (isAccepted(fip))
