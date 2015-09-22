@@ -286,10 +286,10 @@ public class FedoraFileIterator implements FileIterator
         GetDatastreamResponse response = new GetDatastream(identifier, FileInformationPackage.DS_ID_EASY_FILE).execute();
         FileProfile fp = new FileProfile(response.getDatastreamProfile());
         fp.setLastModified(response.getLastModifiedDate());
-        if (!identifier.equals(fp.getIdentifier())) {
-            throw new FarmException("Unequal identifiers: objId=" + identifier + ", " 
-                    + FileInformationPackage.DS_ID_EASY_FILE + "=" + fp.getIdentifier());
-        }
+//        if (!identifier.equals(fp.getIdentifier())) {
+//            throw new FarmException("Unequal identifiers: objId=" + identifier + ", " 
+//                    + FileInformationPackage.DS_ID_EASY_FILE + "=" + fp.getIdentifier());
+//        }
         return fp;
     }
     
@@ -309,8 +309,11 @@ public class FedoraFileIterator implements FileIterator
             .setVisibleTo(root.getChildText("visibleTo"))
             .setAccessibleTo(root.getChildText("accessibleTo"));
         if (!identifier.equals(fmd.getIdentifier())) {
-            throw new FarmException("Unequal identifiers: objId=" + identifier + ", " 
+//            throw new FarmException("Unequal identifiers: objId=" + identifier + ", " 
+//                    + FileMetadata.DS_ID_EASY_FILE_METADATA + "=" + fmd.getIdentifier());
+            logger.warn("Unequal identifiers: objId=" + identifier + ", " 
                     + FileMetadata.DS_ID_EASY_FILE_METADATA + "=" + fmd.getIdentifier());
+            getReporter().reportWarning(identifier, fmd.getFilename(), "Unequal identifiers:" + fmd.getIdentifier());
         }
         return fmd;
     }

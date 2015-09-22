@@ -47,6 +47,11 @@ public class Reporter
         report(getErrorFile(), line);
     }
     
+    public void reportWarning(String identifier, String filename, String msg) {
+        String line = new Date() + SEP + "warning" + SEP + identifier + SEP + filename + SEP + msg + NL;
+        report(getErrorFile(), line);
+    }
+    
     protected void report(String file, String line) {
         try
         {

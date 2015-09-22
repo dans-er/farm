@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class DatePointerIterator extends FedoraFileIterator
 {
     
-    public static final String START_DATE = "2011-01-01";
+    public static final String START_DATE = "2010-01-01";
     public static final String FILE_LOCATION = "datepointer.txt";
     
     private static Logger logger = LoggerFactory.getLogger(DatePointerIterator.class);
